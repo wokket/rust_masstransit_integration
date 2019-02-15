@@ -2,6 +2,7 @@ extern crate amqp;
 extern crate chrono;
 extern crate env_logger;
 extern crate serde_json;
+extern crate uuid;
 
 mod messages;
 mod mt_helpers;

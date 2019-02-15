@@ -4,6 +4,7 @@ use super::mt_helpers;
 use amqp::{protocol, Basic, Channel};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Deserialize, Debug)]
 pub struct Ping {}
@@ -18,7 +19,7 @@ pub struct Pong {
 pub struct MassTransitMessageEnvelope<'a> {
     //from https://github.com/MassTransit/MassTransit/blob/master/src/MassTransit/Serialization/MessageEnvelope.cs
     #[serde(rename = "messageId")]
-    message_id: String,
+    message_id: Uuid,
 
     #[serde(rename = "requestId")]
     request_id: String,
@@ -114,13 +115,13 @@ impl Ping {
         let dest_addr = request_envelope.response_address.clone();
 
         let sending_envelope = MassTransitMessageEnvelope {
-            message_id: "Some unique Id".to_string(),    //TODO:
+            message_id: Uuid::new_v4(),
             source_address: "Rust_Endpoint".to_string(), //TODO:
             destination_address: &request_envelope.response_address.clone(), //make sure we send the response to teh correct place
             message_type: vec!["urn:message:Messages:Pong".to_string()], //TODO: Can we auto-generate this value somehow?
             message: serde_json::to_value(pong).unwrap(),
-            sent_time: Some(Utc::now()), //TODO:
-            ..request_envelope
+            sent_time: Some(Utc::now()),
+            ..request_envelope //just reuse all the other fields (conversation id's etc)
         };
 
         println!("Publishing response: {:?}", sending_envelope);
