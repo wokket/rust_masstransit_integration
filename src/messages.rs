@@ -2,6 +2,7 @@
 
 use super::mt_helpers;
 use amqp::{protocol, Basic, Channel};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
@@ -49,7 +50,7 @@ pub struct MassTransitMessageEnvelope<'a> {
     expiration_time: Option<String>, //DateTime?
 
     #[serde(rename = "sentTime")]
-    sent_time: Option<String>, //DateTime?
+    sent_time: Option<DateTime<Utc>>, //DateTime?
 
     // Headers: Map<String, String>, //TODO: Headers
     host: BusHostInfo,
@@ -118,7 +119,7 @@ impl Ping {
             destination_address: &request_envelope.response_address.clone(), //make sure we send the response to teh correct place
             message_type: vec!["urn:message:Messages:Pong".to_string()], //TODO: Can we auto-generate this value somehow?
             message: serde_json::to_value(pong).unwrap(),
-            sent_time: Some("2019-02-15T03:26:57.8570473Z".to_string()), //TODO:
+            sent_time: Some(Utc::now()), //TODO:
             ..request_envelope
         };
 
