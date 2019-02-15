@@ -6,6 +6,7 @@ extern crate uuid;
 
 mod messages;
 mod mt_helpers;
+mod ping_handler;
 
 use amqp::QueueBuilder;
 use amqp::TableEntry::LongString;
@@ -45,7 +46,7 @@ fn main() {
     // let consumer_name = consume_builder.basic_consume(&mut channel);
     // println!("Starting consumer {:?}", consumer_name);
 
-    let my_consumer = messages::Ping {};
+    let my_consumer = ping_handler::Handler {};
 
     let consumer_name = channel.basic_consume(
         my_consumer,

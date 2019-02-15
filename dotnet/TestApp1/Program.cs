@@ -24,7 +24,7 @@ namespace TestApp1
             var busControl = ConfigureBus();
 
             // Important! The bus must be started before using it!
-            busControl.Start();
+            await busControl.StartAsync();
 
             do
             {
@@ -56,7 +56,7 @@ namespace TestApp1
             }
             while (true);
 
-            busControl.Stop();
+            await busControl.StopAsync();
         }
 
         private static IBusControl ConfigureBus()
