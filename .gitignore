@@ -1,0 +1,5 @@
+/target
+**/*.rs.bk
+dotnet/TestApp1/.vs/
+dotnet/TestApp1/bin/
+dotnet/TestApp1/obj/
