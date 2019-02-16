@@ -58,12 +58,12 @@ impl Handler {
         RESP: Debug,
         RESP: serde::Serialize,
     {
-        let dest_addr = request_envelope.response_address.clone();
+        let dest_addr = request_envelope.response_address.unwrap().clone();
 
         let sending_envelope = MassTransitMessageEnvelope {
             message_id: Uuid::new_v4(),
             source_address: "Rust_Endpoint".to_string(), //TODO:
-            destination_address: request_envelope.response_address.clone(), //make sure we send the response to teh correct place
+            destination_address: dest_addr.clone(), //make sure we send the response to teh correct place
             message_type: vec!["urn:message:Messages:Pong".to_string()], //TODO: Can we auto-generate this value somehow?
             message: reply,
             sent_time: Some(Utc::now()),
@@ -72,32 +72,12 @@ impl Handler {
             expiration_time: request_envelope.expiration_time,
             fault_address: request_envelope.fault_address,
             request_id: request_envelope.request_id,
-            response_address: request_envelope.response_address,
+            response_address: None,
             host: request_envelope.host,
             // we can't just reuse the inbound fields now we have differing generic types
             //..request_envelope //just reuse all the other fields (conversation id's etc)
         };
 
-        eprintln!("Publishing response: {:?}", sending_envelope);
-
-        // publish
-        channel
-            .basic_publish(
-                //exchange
-                super::mt_helpers::convert_urn_to_exchange(&dest_addr), //exchange
-                "",                                                     //route key
-                true,                                                   //mandatory
-                false,                                                  //immediate
-                protocol::basic::BasicProperties {
-                    content_type: Some("application/vnd.masstransit+json".to_string()),
-                    ..Default::default()
-                },
-                serde_json::to_string(&sending_envelope)
-                    .unwrap()
-                    .as_bytes()
-                    .to_vec(),
-            )
-            .ok()
-            .expect("Failed to publish!");
+        mt_helpers::send_reply(channel, dest_addr, sending_envelope);
     }
 }

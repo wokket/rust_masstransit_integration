@@ -1,5 +1,6 @@
-/// Helper Methods for working with MassTransit
-use amqp::protocol;
+//! Helper Methods for working with MassTransit
+use super::messages::MassTransitMessageEnvelope;
+use amqp::{protocol, Basic, Channel};
 
 /// Converts a Mass Transit URN (eg rabbitmq://localhost/bus-TANGO3-dotnet-hkhoyygh4csfpdzdbdmjgn3a8x?durable=false&autodelete=true ) into
 /// an exchange name that we can use in AMPQ-land (eg bus-TANGO3-dotnet-hkhoyygh4csfpdzdbdmjgn3a8x)
@@ -18,7 +19,6 @@ pub fn convert_urn_to_exchange<'a>(mt_urn: &'a str) -> &'a str {
 }
 
 /// Performs sanity checking of the message data prior  to attempting to process it.
-
 /// message_type: The type (namespace? FQN?) of the .Net message we're expecting this AMQP message to contain.  
 /// If the .Net type is `Namespace.TypeName`, this should normally be `Namespace:TypeName` because MT does crazy things.
 /// You can confirm this value by looking at the Exchanges created by MT in Rabbit
@@ -40,6 +40,36 @@ pub fn perform_sanity_checks(
         Some("application/vnd.masstransit+json".to_string()),
         "This crate requires a json encoded MassTransit message!"
     );
+}
+
+pub fn send_reply<T>(
+    channel: &mut Channel,
+    dest_addr: String,
+    envelope: MassTransitMessageEnvelope<T>,
+) where
+    T: std::fmt::Debug,
+    T: serde::Serialize,
+{
+    // publish
+    channel
+        .basic_publish(
+            //exchange
+            convert_urn_to_exchange(&dest_addr), //exchange
+            "",                                  //route key
+            true,                                //mandatory
+            false,                               //immediate
+            protocol::basic::BasicProperties {
+                //TODO: Any more MT headers we need here?
+                content_type: Some("application/vnd.masstransit+json".to_string()),
+                ..Default::default()
+            },
+            serde_json::to_string(&envelope)
+                .unwrap()
+                .as_bytes()
+                .to_vec(),
+        )
+        .ok()
+        .expect("Failed to publish!");
 }
 
 #[cfg(test)]
