@@ -16,7 +16,7 @@ pub struct Pong {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct MassTransitMessageEnvelope<'a> {
+pub struct MassTransitMessageEnvelope<T> {
     //from https://github.com/MassTransit/MassTransit/blob/master/src/MassTransit/Serialization/MessageEnvelope.cs
     #[serde(rename = "messageId")]
     pub message_id: Uuid,
@@ -34,7 +34,7 @@ pub struct MassTransitMessageEnvelope<'a> {
     pub source_address: String,
 
     #[serde(rename = "destinationAddress")]
-    pub destination_address: &'a str,
+    pub destination_address: String,
 
     #[serde(rename = "responseAddress")]
     pub response_address: String,
@@ -45,7 +45,7 @@ pub struct MassTransitMessageEnvelope<'a> {
     #[serde(rename = "messageType")]
     pub message_type: Vec<String>,
 
-    pub message: serde_json::Value, // more json
+    pub message: T,
 
     #[serde(rename = "expirationTime")]
     pub expiration_time: Option<String>, //DateTime?
