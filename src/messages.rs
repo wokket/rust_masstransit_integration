@@ -40,7 +40,7 @@ where
     pub destination_address: String,
 
     #[serde(rename = "responseAddress")]
-    pub response_address: String,
+    pub response_address: Option<String>,
 
     #[serde(rename = "faultAddress")]
     pub fault_address: Option<String>,
