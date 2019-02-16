@@ -1,5 +1,7 @@
 ﻿using MassTransit;
+using Messages;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Messages
@@ -26,35 +28,59 @@ namespace TestApp1
             // Important! The bus must be started before using it!
             await busControl.StartAsync();
 
-            do
+            const int MsgCount = 1000;
+
+            var ping = new Ping { Value = "testing..." };
+
+            var timer = Stopwatch.StartNew();
+
+            for (var i = 0; i < MsgCount; i++)
             {
-                Console.WriteLine("Enter messageId (or quit to exit)");
-                Console.Write("> ");
-                string value = Console.ReadLine();
-
-                if ("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
-                {
-                    break;
-                }
-
                 try
                 {
-                    var result = await busControl.Request<Messages.Ping, Messages.Pong>(
-                        new
-                        {
-                            Value = value
-                        },
+                    var result = await busControl.Request<Ping, Pong>(
+                        ping,
                         timeout: RequestTimeout.After(s: 5)
                     );
-
-                    Console.WriteLine(result.Message.ReplyValue);
                 }
                 catch (RequestTimeoutException)
                 {
-                    Console.WriteLine("Timed out...");
+                    Console.WriteLine("Message timed out, cancelling!...");
+                    break;
                 }
             }
-            while (true);
+            var elapsed = timer.ElapsedMilliseconds;
+            Console.WriteLine($"Processed {MsgCount} messages in {elapsed}ms, avg: {elapsed/MsgCount}ms/msg");
+
+            /* do
+             {
+                 Console.WriteLine("Enter messageId (or quit to exit)");
+                 Console.Write("> ");
+                 string value = Console.ReadLine();
+
+                 if ("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
+                 {
+                     break;
+                 }
+
+                 try
+                 {
+                     var result = await busControl.Request<Messages.Ping, Messages.Pong>(
+                         new
+                         {
+                             Value = value
+                         },
+                         timeout: RequestTimeout.After(s: 5)
+                     );
+
+                     Console.WriteLine(result.Message.ReplyValue);
+                 }
+                 catch (RequestTimeoutException)
+                 {
+                     Console.WriteLine("Timed out...");
+                 }
+             }
+             while (true);*/
 
             await busControl.StopAsync();
         }
@@ -69,10 +95,10 @@ namespace TestApp1
                     h.Password("guest");
                 });
 
-                //cfg.ReceiveEndpoint(host, "dotnet_response_handler", e =>
-                //{
-                //    e.Consumer<PingHandler>();
-                //});
+                cfg.ReceiveEndpoint(host, "dotnet_response_handler", e =>
+                {
+                    e.Consumer<PingHandler>();
+                });
             });
         }
     }

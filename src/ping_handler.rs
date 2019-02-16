@@ -23,7 +23,7 @@ impl amqp::Consumer for Handler {
         let envelope: MassTransitMessageEnvelope<Ping> = serde_json::from_str(&body_as_string)
             .expect("Unable to deserialise AMQP message body to MassTransitEnvelope");
 
-        eprintln!("Deserialized  Envelope: {:?}", envelope);
+        // eprintln!("Deserialized  Envelope: {:?}", envelope);
 
         assert_eq!(
             envelope.message_type[0], "urn:message:Messages:Ping",

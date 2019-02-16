@@ -28,8 +28,8 @@ pub fn perform_sanity_checks(
     headers: &protocol::basic::BasicProperties,
 ) {
     // debug info
-    eprintln!("Deliver info: {:?}", deliver);
-    eprintln!("Content headers: {:?}", headers);
+    //eprintln!("Deliver info: {:?}", deliver);
+    //eprintln!("Content headers: {:?}", headers);
 
     // Ensure we've come from a correctly-typed exchange
     assert_eq!(deliver.exchange, message_type, "Incorrect message type?");

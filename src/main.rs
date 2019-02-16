@@ -4,9 +4,9 @@ extern crate env_logger;
 extern crate serde_json;
 extern crate uuid;
 
-mod messages;
-mod mt_helpers;
-mod ping_handler;
+pub mod messages;
+pub mod mt_helpers;
+pub mod ping_handler;
 
 use amqp::QueueBuilder;
 use amqp::TableEntry::LongString;
