@@ -16,7 +16,10 @@ pub struct Pong {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct MassTransitMessageEnvelope<T> {
+pub struct MassTransitMessageEnvelope<T>
+where
+    T: std::fmt::Debug,
+{
     //from https://github.com/MassTransit/MassTransit/blob/master/src/MassTransit/Serialization/MessageEnvelope.cs
     #[serde(rename = "messageId")]
     pub message_id: Uuid,
